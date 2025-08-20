@@ -10,4 +10,9 @@ export default defineConfig({
       "/api": "http://localhost:5000",
     },
   },
+  preview: {
+    host: true,
+    port: process.env.PORT ? Number(process.env.PORT) : 4173,
+    allowedHosts: ["airtable-forms.onrender.com"],
+  },
 });
