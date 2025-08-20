@@ -20,7 +20,7 @@ app.use(
     saveUninitialized: false,
     store:
       process.env.NODE_ENV === "production"
-        ? MongoStore.create({ mongoUrl: process.env.MONGO_URI_DEV })
+        ? MongoStore.create({ mongoUrl: process.env.MONGO_URI_PROD })
         : undefined, // In dev, default memory store is fine
     cookie: {
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
