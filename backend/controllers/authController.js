@@ -24,7 +24,12 @@ const authController = {
       crypto.createHash("sha256").update(codeVerifier).digest()
     );
 
-    const redirectUri = process.env.AIRTABLE_REDIRECT_URI;
+    const isProd = process.env.NODE_ENV === "production";
+    const redirectUri =
+      process.env.AIRTABLE_REDIRECT_URI ||
+      (isProd
+        ? "https://airtable-forms.onrender.com/api/auth/airtable/callback"
+        : "http://localhost:5000/api/auth/airtable/callback");
     console.log("redirectUri: ", redirectUri);
     const scope = "schema.bases:read data.records:write data.records:read";
     console.log("scope: ", scope);
@@ -107,7 +112,13 @@ const authController = {
       const paramsBasic = new URLSearchParams();
       paramsBasic.append("grant_type", "authorization_code");
       paramsBasic.append("code", code);
-      paramsBasic.append("redirect_uri", process.env.AIRTABLE_REDIRECT_URI);
+      paramsBasic.append(
+        "redirect_uri",
+        process.env.AIRTABLE_REDIRECT_URI ||
+          (process.env.NODE_ENV === "production"
+            ? "https://airtable-forms.onrender.com/api/auth/airtable/callback"
+            : "http://localhost:5000/api/auth/airtable/callback")
+      );
       paramsBasic.append("code_verifier", codeVerifier);
 
       const basicAuth = Buffer.from(
@@ -143,7 +154,13 @@ const authController = {
             "client_secret",
             process.env.AIRTABLE_CLIENT_SECRET
           );
-          paramsBody.append("redirect_uri", process.env.AIRTABLE_REDIRECT_URI);
+          paramsBody.append(
+            "redirect_uri",
+            process.env.AIRTABLE_REDIRECT_URI ||
+              (process.env.NODE_ENV === "production"
+                ? "https://airtable-forms.onrender.com/api/auth/airtable/callback"
+                : "http://localhost:5000/api/auth/airtable/callback")
+          );
           paramsBody.append("code_verifier", codeVerifier);
 
           tokenRes = await axios.post(tokenUrl, paramsBody.toString(), {

@@ -3,14 +3,31 @@ const session = require("express-session");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db.js");
 const MongoStore = require("connect-mongo");
+const cors = require("cors");
 
 dotenv.config();
 
 // DB Connection
 connectDB();
 const app = express();
+
+// Enable trust proxy in production so secure cookies work behind proxies
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Optional CORS for separate frontend domain
+if (process.env.FRONTEND_URL) {
+  app.use(
+    cors({
+      origin: process.env.FRONTEND_URL,
+      credentials: true,
+    })
+  );
+}
 
 // Session Config
 app.use(
@@ -23,9 +40,12 @@ app.use(
         ? MongoStore.create({ mongoUrl: process.env.MONGO_URI_PROD })
         : undefined, // In dev, default memory store is fine
     cookie: {
-      secure: process.env.NODE_ENV === "production", // HTTPS only in production
+      // If doing cross-site (separate frontend domain), set CROSS_SITE_COOKIES=true
+      secure:
+        process.env.CROSS_SITE_COOKIES === "true" ||
+        process.env.NODE_ENV === "production",
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: process.env.CROSS_SITE_COOKIES === "true" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     },
   })
